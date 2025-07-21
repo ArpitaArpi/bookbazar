@@ -14,7 +14,6 @@ const AllBooks = () => {
       .catch((err) => console.error(err));
   }, []);
 
-  // Get search query from URL
   const params = new URLSearchParams(location.search);
   const search = params.get("search")?.toLowerCase() || "";
 
