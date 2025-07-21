@@ -1,5 +1,6 @@
-import cors from "cors";
 import dotenv from 'dotenv';
+
+import cors from "cors";
 import express from "express";
 import mongoose from "mongoose";
 import adminRoutes from './src/routes/adminRoutes.js';

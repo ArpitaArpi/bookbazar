@@ -1,1 +1,5 @@
 .DS_Store
+./node_modules
+/frontend
+node_modules/.package-lock.json
+node_modules/clsx/package.json

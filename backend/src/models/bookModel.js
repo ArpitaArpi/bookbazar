@@ -5,6 +5,10 @@ const bookSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    author: {
+        type: String,
+        required: true,
+    },
     description: {
         type: String,
         required: true,
@@ -13,20 +17,16 @@ const bookSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    trending: {
-        type: Boolean,
-        required: true,
-    },
-    coverImage: {
+    coverImageUrl: {
         type: String,
         required: true,
     },
-    oldPrice: {
+    price: {
         type: Number,
         required: true,
     },
-    newPrice: {
-        type: Number,
+    trending: {
+        type: Boolean,
         required: true,
     },
     createdAt: {
@@ -40,3 +40,4 @@ const bookSchema = new mongoose.Schema({
   const Book = mongoose.model('Book', bookSchema);
 
 export default Book;
+  

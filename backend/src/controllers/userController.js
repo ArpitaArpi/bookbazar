@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
 
-const JWT_SECRET = process.env.JWT_SECRET_KEY;
+const JWT_SECRET = 'bookbazar-secret-key-2024';
 
 // Helper function to generate a JWT token
 const generateToken = (user) => {
@@ -133,21 +133,17 @@ const adminLogin = async (req, res) => {
     }
     
     try {
-        console.log('Attempting admin login for username:', username);
         
         const admin = await User.findOne({ username });
         if (!admin) {
-            console.log('No user found with username:', username);
             return res.status(404).json({ message: "Admin not found." });
         }
 
-        console.log('User found. Role:', admin.role);
         if (admin.role !== 'admin') {
             return res.status(403).json({ message: "User exists but is not an admin." });
         }
 
         const isMatch = await bcrypt.compare(password, admin.password);
-        console.log('Password match result:', isMatch);
         
         if (!isMatch) {
             return res.status(401).json({ message: "Invalid credentials." });
