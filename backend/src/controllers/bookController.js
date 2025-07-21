@@ -1,8 +1,9 @@
 import Book from "../models/bookModel.js";
 
+// creat a book
 const postABook = async (req, res) => {
     try {
-        const newBook = await Book({...req.body});
+        const newBook = new Book(req.body);
         await newBook.save();
         res.status(200).send({message: "Book posted successfully", book: newBook})
     } catch (error) {
@@ -14,14 +15,22 @@ const postABook = async (req, res) => {
 // get all books
 const getAllBooks = async (req, res) => {
     try {
-        const books = await Book.find().sort({ createdAt: -1});
-        res.status(200).send(books)
+        const query = {};
+        if (req.query.category) {
+            query.category = req.query.category;
+        }
+        if (req.query.trending) {
+            query.trending = req.query.trending;
+        }
+
+        const books = await Book.find(query).sort({ createdAt: -1 });
+        res.status(200).send(books);
         
     } catch (error) {
         console.error("Error fetching books", error);
-        res.status(500).send({message: "Failed to fetch books"})
+        res.status(500).send({message: "Failed to fetch books"});
     }
-}
+};
 
 //get single book
 const getSingleBook = async (req, res) => {
@@ -76,9 +85,7 @@ const deleteABook = async (req, res) => {
 };
 
 export {
-    postABook,
-    getAllBooks,
-    getSingleBook,
-    updateBook,
-    deleteABook
-}
+    deleteABook, getAllBooks,
+    getSingleBook, postABook, updateBook
+};
+

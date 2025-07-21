@@ -4,32 +4,112 @@ import User from '../models/userModel.js';
 
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
 
-// Login function for regular users
+// Helper function to generate a JWT token
+const generateToken = (user) => {
+    if (!JWT_SECRET) {
+        throw new Error('JWT_SECRET_KEY is not defined in environment variables');
+    }
+    return jwt.sign(
+        { id: user._id, username: user.username, role: user.role },
+        JWT_SECRET,
+        { expiresIn: "1h" }
+    );
+};
+
+// Register a new user with 'user' role
+const registerUser = async (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required." });
+    }
+
+    try {
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ message: "Username already exists." });
+        }
+
+        const newUser = new User({
+            username,
+            password,
+            role: "user"
+        });
+
+        await newUser.save();
+
+        res.status(201).json({
+            message: "User registered successfully.",
+            user: {
+                username: newUser.username,
+                role: newUser.role
+            }
+        });
+    } catch (error) {
+        console.error("Error during user registration:", error);
+        res.status(500).json({ message: "Server error during user registration." });
+    }
+};
+
+// Register a new admin with 'admin' role
+const registerAdmin = async (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required." });
+    }
+
+    try {
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ message: "Username already exists." });
+        }
+
+        const newAdmin = new User({
+            username,
+            password,
+            role: "admin"
+        });
+
+        await newAdmin.save();
+
+        res.status(201).json({
+            message: "Admin registered successfully.",
+            user: {
+                username: newAdmin.username,
+                role: newAdmin.role
+            }
+        });
+    } catch (error) {
+        console.error("Error during admin registration:", error);
+        res.status(500).json({ message: "Server error during admin registration." });
+    }
+};
+
+// Login for regular users
 const login = async (req, res) => {
     const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required." });
+    }
+
     try {
-        // Find the user
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ username, role: 'user' });
         if (!user) {
-            return res.status(404).send({ message: "User not found!" });
+            return res.status(404).json({ message: "User not found or is not a regular user." });
         }
-        
-        // Compare password with hashed password in the database
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).send({ message: "Invalid password!" });
+            return res.status(401).json({ message: "Invalid credentials." });
         }
-        
-        // Create JWT token
-        const token = jwt.sign(
-            { id: user._id, username: user.username, role: user.role },
-            JWT_SECRET,
-            { expiresIn: "1h" }
-        );
-        
+
+        const token = generateToken(user);
+
         return res.status(200).json({
-            message: "Login successful",
-            token: token,
+            message: "Login successful.",
+            token,
             user: {
                 username: user.username,
                 role: user.role
@@ -37,79 +117,69 @@ const login = async (req, res) => {
         });
     } catch (error) {
         console.error("Failed to login:", error);
-        return res.status(500).send({ message: "Failed to login" });
-    }
-};
-
-// Register a new user
-const registerUser = async (req, res) => {
-    try {
-        const { username, password, role } = req.body;
-        
-        // Check if user already exists
-        const existingUser = await User.findOne({ username });
-        if (existingUser) {
-            return res.status(400).json({ message: "Username already taken" });
+        if (error.message === 'JWT_SECRET_KEY is not defined in environment variables') {
+            return res.status(500).json({ message: "Server configuration error. Please contact administrator." });
         }
-        
-        // Create new user
-        const newUser = new User({
-            username,
-            password, // Will be hashed by pre-save hook
-            role: role || "user" // Default to "user" if role is not specified
-        });
-        
-        await newUser.save();
-        
-        res.status(201).json({
-            message: "User created successfully",
-            user: {
-                username: newUser.username,
-                role: newUser.role
-            }
-        });
-    } catch (error) {
-        console.error("Error creating user:", error);
-        res.status(500).json({ message: "Failed to create user" });
+        return res.status(500).json({ message: "Server error during login." });
     }
 };
 
+// Login for admin users
 const adminLogin = async (req, res) => {
     const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required." });
+    }
+    
     try {
+        console.log('Attempting admin login for username:', username);
+        
         const admin = await User.findOne({ username });
         if (!admin) {
-            return res.status(404).send({ message: "Admin not found!" });
+            console.log('No user found with username:', username);
+            return res.status(404).json({ message: "Admin not found." });
         }
-        // Compare password with hashed password in the database
+
+        console.log('User found. Role:', admin.role);
+        if (admin.role !== 'admin') {
+            return res.status(403).json({ message: "User exists but is not an admin." });
+        }
+
         const isMatch = await bcrypt.compare(password, admin.password);
-        if (!isMatch) {
-            return res.status(401).send({ message: "Invalid password!" });
-        }
+        console.log('Password match result:', isMatch);
         
-        const token = jwt.sign(
-            { id: admin._id, username: admin.username, role: admin.role }, 
-            JWT_SECRET,
-            { expiresIn: "1h" }
-        );
+        if (!isMatch) {
+            return res.status(401).json({ message: "Invalid credentials." });
+        }
+
+        if (!JWT_SECRET) {
+            console.error('JWT_SECRET_KEY is not defined in environment variables');
+            return res.status(500).json({ 
+                message: "Server configuration error. JWT_SECRET_KEY is missing." 
+            });
+        }
+
+        const token = generateToken(admin);
 
         return res.status(200).json({
-            message: "Authentication successful",
-            token: token,
+            message: "Admin login successful.",
+            token,
             user: {
                 username: admin.username,
                 role: admin.role
             }
         });
-        
     } catch (error) {
-        console.error("Failed to login as admin", error);
-        return res.status(401).send({ message: "Failed to login as admin" }); 
+        console.error("Failed to login as admin. Error:", error);
+        if (error.message === 'JWT_SECRET_KEY is not defined in environment variables') {
+            return res.status(500).json({ 
+                message: "Server configuration error. JWT_SECRET_KEY is missing." 
+            });
+        }
+        return res.status(500).json({ message: "Server error during admin login." });
     }
 };
-
-// Use registerUser as registerAdmin function
-const registerAdmin = registerUser;
 
 export {
     adminLogin, login, registerAdmin, registerUser
