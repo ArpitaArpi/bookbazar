@@ -25,19 +25,34 @@ const bookSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    discount: {
+        type: Number,
+        default: 0, 
+    },
+    sales: {
+        type: Number,
+        default: 0, 
+    },
     trending: {
         type: Boolean,
-        required: true,
+        default: false,
+    },
+    specialOffer: {
+        type: Boolean,
+        default: false, 
+    },
+    reviewCount: {
+        type: Number,
+        default: 0, 
     },
     createdAt: {
         type: Date,
         default: Date.now,
     }
-  }, {
+}, {
     timestamps: true,
-  });
+});
 
-  const Book = mongoose.model('Book', bookSchema);
+const Book = mongoose.model('Book', bookSchema);
 
 export default Book;
-  
