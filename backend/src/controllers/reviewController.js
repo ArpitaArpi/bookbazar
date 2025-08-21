@@ -1,7 +1,5 @@
 import Review from "../models/reviewModel.js";
 
-// @desc    Create a new review
-// @route   POST /api/reviews
 export const createReview = async (req, res) => {
   try {
     const { user, book, rating, comment } = req.body;
@@ -17,8 +15,7 @@ export const createReview = async (req, res) => {
   }
 };
 
-// @desc    Get all reviews
-// @route   GET /api/reviews
+
 export const getReviews = async (req, res) => {
   try {
     const reviews = await Review.find().populate("user", "username").populate("book", "title");
@@ -28,8 +25,6 @@ export const getReviews = async (req, res) => {
   }
 };
 
-// @desc    Get reviews for a specific book
-// @route   GET /api/reviews/book/:bookId
 export const getReviewsByBook = async (req, res) => {
   try {
     const { bookId } = req.params;

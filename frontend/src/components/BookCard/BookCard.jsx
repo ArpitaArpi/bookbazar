@@ -1,38 +1,80 @@
-import { FaCartPlus, FaEdit, FaEye, FaFire } from "react-icons/fa";
+
+
+import { FaCartPlus, FaEdit, FaFire } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-const BookCard = ({ title, author, price, coverImageUrl, id, category, trending, onEdit, onAddToCart }) => {
+const BookCard = ({
+  id,
+  title,
+  author,
+  price,
+  coverImageUrl,
+  category,
+  trending,
+  onEdit,
+  onAddToCart,
+}) => {
   return (
-    <div className="bg-white w-72 min-h-[520px] rounded-2xl shadow-lg border border-base-200 p-4 flex flex-col items-center transition-transform hover:-translate-y-1 hover:shadow-2xl hover:bg-gray-50 relative">
+    <div className="relative group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden">
+      {/* Trending Badge */}
       {trending && (
-        <span className="absolute top-4 right-4 badge badge-warning flex items-center gap-1 text-xs font-semibold px-3 py-1 z-10">
-          <FaFire className="text-orange-500" /> Trending
+        <span className="absolute top-3 left-3 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+          <FaFire /> Trending
         </span>
       )}
-      <figure className="mb-4 w-full flex justify-center h-56 bg-base-200 rounded-xl overflow-hidden">
+
+      {/* Book Image */}
+      <div className="h-64 overflow-hidden rounded-t-2xl">
         <img
-          src={coverImageUrl || 'https://placehold.co/220x300?text=No+Image'}
+          src={coverImageUrl || "https://placehold.co/220x300?text=No+Image"}
           alt={title}
-          className="object-contain h-full w-auto"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-      </figure>
-      <h2 className="font-bold text-lg text-gray-800 text-center mb-1 line-clamp-2">{title}</h2>
-      <p className="text-sm text-gray-600 mb-2 text-center">{author && <>by <span className="font-medium">{author}</span></>}</p>
-      <div className="flex flex-wrap gap-2 justify-center mb-2">
-        {category && <span className="badge badge-info badge-outline px-3 py-1 text-sm">{category}</span>}
       </div>
-      <p className="text-primary font-bold text-xl mb-4">{price ? `৳${price}` : "Price on request"}</p>
-      <div className="flex-grow" />
-      <div className="flex flex-col gap-2 w-full mt-auto">
-        <button className="btn btn-primary btn-sm w-full flex items-center gap-2" onClick={onAddToCart}>
-          <FaCartPlus /> Add to Cart
-        </button>
-        <button className="btn btn-warning btn-sm w-full flex items-center gap-2" onClick={onEdit}>
-          <FaEdit /> Edit
-        </button>
-        <Link to={`/books/${id}`} className="btn btn-outline btn-sm w-full flex items-center gap-2">
-          <FaEye /> View Details
-        </Link>
+
+      {/* Book Info */}
+      <div className="p-5 flex flex-col justify-between h-60">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800 line-clamp-1">{title}</h2>
+          <p className="text-gray-500 text-sm mb-2">by {author}</p>
+          {category && (
+            <span className="inline-block bg-indigo-100 text-indigo-600 text-xs font-semibold px-3 py-1 rounded-full">
+              {category}
+            </span>
+          )}
+        </div>
+
+        {/* Price + Actions */}
+        <div className="mt-4 flex flex-col gap-2">
+          <span className="text-lg font-bold text-indigo-700">
+            {price ? `$${price}` : "Contact for price"}
+          </span>
+
+          {/* Buttons */}
+          <div className="flex justify-between items-center gap-2">
+            <Link
+              to={`/books/${id}`}
+              className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold"
+            >
+              View Details
+            </Link>
+
+            <div className="flex gap-2">
+              <button
+                onClick={onEdit}
+                className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
+              >
+                <FaEdit className="text-gray-600" />
+              </button>
+              <button
+                onClick={onAddToCart}
+                className="p-2 bg-yellow-400 rounded-full hover:bg-yellow-500 transition"
+              >
+                <FaCartPlus className="text-black" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const BookDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
     fetch(`http://localhost:5001/api/books/${id}`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setBook(data);
         setLoading(false);
       })
@@ -18,31 +19,61 @@ const BookDetails = () => {
   }, [id]);
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center text-xl text-gray-600">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-xl text-gray-600">
+        Loading...
+      </div>
+    );
   }
 
   if (!book) {
-    return <div className="min-h-screen flex items-center justify-center text-xl text-red-500">Book not found.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-xl text-red-500">
+        Book not found.
+      </div>
+    );
   }
 
   return (
-    <section className="min-h-screen bg-white py-20">
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg border border-base-200 p-8 flex flex-col items-center">
+    <section className="min-h-screen bg-gray-50 py-20">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8 flex flex-col md:flex-row gap-8">
+        {/* Book Image */}
         <img
-          src={book.coverImageUrl || 'https://placehold.co/220x300?text=No+Image'}
+          src={book.coverImageUrl || "https://placehold.co/220x300?text=No+Image"}
           alt={book.title}
-          className="object-contain h-64 w-auto rounded-xl mb-6 bg-base-200"
+          className="h-80 md:h-96 w-auto rounded-lg shadow-md"
         />
-        <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">{book.title}</h1>
-        <p className="text-md text-gray-600 mb-2 text-center">by <span className="font-medium">{book.author}</span></p>
-        {book.category && <span className="badge badge-info badge-outline px-3 py-1 text-sm mb-4">{book.category}</span>}
-        <p className="text-primary font-bold text-xl mb-4">{book.price ? `৳${book.price}` : "Price on request"}</p>
-        <div className="w-full border-t border-base-200 my-4"></div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-2 w-full text-left">Description</h2>
-        <p className="text-gray-600 text-justify w-full mb-2">{book.description || 'No description available.'}</p>
+
+        {/* Book Info */}
+        <div className="flex-1 flex flex-col justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-4">{book.title}</h1>
+            <p className="text-gray-600 mb-2">by {book.author}</p>
+            <p className="text-gray-700 mb-4">{book.description || "No description available."}</p>
+            {book.category && (
+              <span className="inline-block bg-indigo-100 text-indigo-600 text-sm font-semibold px-3 py-1 rounded-full mb-4">
+                {book.category}
+              </span>
+            )}
+          </div>
+
+          {/* Price & Order Button */}
+          <div className="mt-4 flex flex-col gap-4">
+            <span className="text-2xl font-bold text-indigo-700">
+              {book.price ? `$${book.price}` : "Contact for price"}
+            </span>
+
+            <button
+              onClick={() => navigate(`/order/${book._id}`)}
+              className="w-full bg-green-500 text-white py-3 rounded-xl text-lg font-semibold hover:bg-green-600 transition"
+            >
+              Order Now
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   );
 };
 
-export default BookDetails; 
+export default BookDetails;

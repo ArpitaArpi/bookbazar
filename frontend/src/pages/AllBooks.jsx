@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import BookCard from "../components/BookCard/BookCard";
 
-const AllBooks = () => {
+const AllBooks = ({ darkMode }) => {
   const [books, setBooks] = useState([]);
   const location = useLocation();
 
@@ -17,7 +17,6 @@ const AllBooks = () => {
   const params = new URLSearchParams(location.search);
   const search = params.get("search")?.toLowerCase() || "";
 
-
   const filteredBooks = search
     ? books.filter(
         (book) =>
@@ -27,25 +26,24 @@ const AllBooks = () => {
       )
     : books;
 
-  // Sort the books by tending tags
   const sortedBooks = [...filteredBooks].sort(
     (a, b) => (b.trending === true) - (a.trending === true)
   );
 
-  
   const handleEdit = (book) => toast.info(`Edit book: ${book.title}`);
   const handleAddToCart = (book) => toast.success(`Added to cart: ${book.title}`);
 
   return (
-    <section className="bg-white min-h-screen py-20">
+    <section className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"} min-h-screen py-20`}>
       <div className="max-w-7xl mx-auto px-4 flex flex-col items-center">
-        <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">
-          All Our Books
+        <h1 className="text-4xl font-extrabold text-center mb-12 drop-shadow-lg">
+          Explore Our Collection
         </h1>
+
         <div
-          className="grid gap-6 justify-center w-full"
+          className="grid gap-8 justify-center w-full"
           style={{
-            gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             maxWidth: "1200px",
           }}
         >
@@ -64,9 +62,10 @@ const AllBooks = () => {
             />
           ))}
         </div>
+        
         {sortedBooks.length === 0 && (
-          <div className="text-center text-lg text-gray-600 mt-12">
-            No books found.
+          <div className="text-center text-lg mt-12 text-gray-500 dark:text-gray-300">
+            No books found. Try searching for something else!
           </div>
         )}
       </div>
